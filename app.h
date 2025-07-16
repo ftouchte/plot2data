@@ -61,7 +61,9 @@ protected :
 	double xmax;
 	double ymin;
 	double ymax;
-	
+	// for CSS file	
+	Glib::RefPtr<Gtk::CssProvider> m_refCssProvider; // copied from gtkmm documention
+	static void on_parsing_error(const Glib::RefPtr<const Gtk::CssSection>& section, const Glib::Error& error);
 public :
 	Window();
 	~Window();

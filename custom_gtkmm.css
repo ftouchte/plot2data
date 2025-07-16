@@ -1,0 +1,19 @@
+.button-layout {
+  background: rgba(48, 50, 51, 0.471);
+  color: white;
+  font-weight: bold;
+  border-radius: 0px;
+  border-style: dotted;
+  padding: 10px;
+}
+
+.button-layout:hover {
+  background: #45A049;
+}
+
+.bar {
+  background: rgba(48, 50, 51, 0.471);
+}
+
+#terminal-area {
+}
