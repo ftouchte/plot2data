@@ -6,12 +6,13 @@
 	border-color: rgb(108, 5, 71);
 	border-radius: 0px;
 	border-style: dashed;
-	border-width: 5px;
+	border-width: 3px;
 	padding: 10px;
+	font-family: "Lucida Console", "Courier New", monospace;
 }
 
 .button-layout:hover {
-	background: #45A049;
+	background: rgb(88, 145, 244);
 }
 
 .bar {
@@ -27,8 +28,17 @@
 	border-width: 10px;
 }
 
-#frame-sidebar {
+#frame-tools {
 	background: rgb(88, 165, 214);
+	color: rgb(0, 0, 0);
+	font-weight: bold;
+	border-radius: 0px;
+	border-style: groove;
+	border-width: 10px;
+}
+
+#frame-settings {
+	background: rgb(252, 251, 175);
 	color: rgb(0, 0, 0);
 	font-weight: bold;
 	border-radius: 0px;
@@ -44,3 +54,7 @@
 	border-width: 10px;
 }
 
+#separator-sidebar {
+	background: rgb(255, 255, 255);
+	min-height: 2px;
+}

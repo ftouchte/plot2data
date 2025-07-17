@@ -39,10 +39,13 @@
 class Window : public Gtk::Window {
 protected :
 	// Widgets
-	Gtk::Box VBox_main, VBox_header, VBox_body, VBox_footer, VBox_sidebar;
-	Gtk::Paned HPaned, VPaned;
+	Gtk::Box VBox_main, VBox_header, VBox_body, VBox_footer, VBox_sidebar, VBox_tools, VBox_settings;
+	Gtk::Paned HPaned, VPaned_sidebar, VPaned;
+	Gtk::ScrolledWindow ScrolledWindow_tools;
 	Gtk::DrawingArea DrawingArea_plot;
-	Gtk::Frame Frame_sidebar, Frame_terminal, Frame_area;
+	Gtk::Frame Frame_tools, Frame_settings, Frame_terminal, Frame_area;
+	Gtk::Label Label_settings;
+	//Gtk::Separator Separator_sidebar;
 
 	// Peut-être devrais-je customiser les bouttons
 	Gtk::Button Button_select_file;
