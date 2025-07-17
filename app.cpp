@@ -30,10 +30,10 @@ Window::Window() :
 	set_default_size(1600,990);
 	set_child(VBox_main);
 	VBox_main.append(VBox_header);
-	VBox_header.append(*Gtk::make_managed<Gtk::Label>("Header area"));
+	//VBox_header.append(*Gtk::make_managed<Gtk::Label>("Header area"));
 	VBox_main.append(VBox_body);
 	VBox_main.append(VBox_footer);
-	VBox_footer.append(*Gtk::make_managed<Gtk::Label>("Footer area"));
+	//VBox_footer.append(*Gtk::make_managed<Gtk::Label>("Footer area"));
 
 	// Header
 	VBox_header.add_css_class("bar");
