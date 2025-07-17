@@ -42,6 +42,7 @@ protected :
 	Gtk::Box VBox_main, VBox_header, VBox_body, VBox_footer, VBox_sidebar;
 	Gtk::Paned HPaned, VPaned;
 	Gtk::DrawingArea DrawingArea_plot;
+	Gtk::Frame Frame_sidebar, Frame_terminal, Frame_area;
 
 	// Peut-être devrais-je customiser les bouttons
 	Gtk::Button Button_select_file;

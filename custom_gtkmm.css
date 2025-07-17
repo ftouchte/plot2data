@@ -1,19 +1,46 @@
 .button-layout {
-  background: rgba(48, 50, 51, 0.471);
-  color: white;
-  font-weight: bold;
-  border-radius: 0px;
-  border-style: dotted;
-  padding: 10px;
+	/*background: rgb(108, 5, 71);*/
+	background: rgb(88, 165, 214);
+	color: rgb(0, 0, 0);
+	font-weight: normal;
+	border-color: rgb(108, 5, 71);
+	border-radius: 0px;
+	border-style: dashed;
+	border-width: 5px;
+	padding: 10px;
 }
 
 .button-layout:hover {
-  background: #45A049;
+	background: #45A049;
 }
 
 .bar {
-  background: rgba(48, 50, 51, 0.471);
+	background: rgba(48, 50, 51, 0.471);
 }
 
-#terminal-area {
+#frame-terminal {
+	background: rgb(147, 250, 184);
+	/*color: white;*/
+	font-weight: bold;
+	border-radius: 0px;
+	border-style: groove;
+	border-width: 10px;
 }
+
+#frame-sidebar {
+	background: rgb(88, 165, 214);
+	color: rgb(0, 0, 0);
+	font-weight: bold;
+	border-radius: 0px;
+	border-style: groove;
+	border-width: 10px;
+}
+
+#frame-area {
+	/*color: white;*/
+	font-weight: bold;
+	border-radius: 0px;
+	border-style: groove;
+	border-width: 10px;
+}
+

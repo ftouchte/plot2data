@@ -39,24 +39,36 @@ Window::Window() :
 	VBox_header.add_css_class("bar");
 	// Footer
 	VBox_footer.add_css_class("bar");
-	// Body
+	// Body overview
+		// left side
 	VBox_body.append(HPaned);
-	HPaned.set_position(300);
-	HPaned.set_start_child(VBox_sidebar);
-	VBox_sidebar.append(*Gtk::make_managed<Gtk::Label>("Sidebar area"));
+	HPaned.set_start_child(Frame_sidebar);
+	HPaned.set_position(300); // requested size for the first child
+	Frame_sidebar.set_label("Tools");
+	Frame_sidebar.set_name("frame-sidebar");
+	Frame_sidebar.set_child(VBox_sidebar);
+		// right side
 	HPaned.set_end_child(VPaned);
+		// top of right side
 	VPaned.set_position(800);
-	VPaned.set_start_child(DrawingArea_plot);
+	VPaned.set_start_child(Frame_area);
+	Frame_area.set_label("Drawing Area");
+	Frame_area.set_label_align(Gtk::Align::CENTER);
+	Frame_area.set_name("frame-area");
+	Frame_area.set_child(DrawingArea_plot);
 	DrawingArea_plot.set_expand();
+		// bottom of right side
 	// Create a new object: Terminal or Log that inherits from ScrolledWindow
-	auto terminal_area = Gtk::make_managed<Gtk::Label>("Terminal area");
-	terminal_area->set_name("terminal-area");
-	VPaned.set_end_child(*terminal_area);
+	VPaned.set_end_child(Frame_terminal);
+	Frame_terminal.set_label("Terminal");
+	Frame_terminal.set_label_align(Gtk::Align::CENTER);
+	Frame_terminal.set_name("frame-terminal");
 
-	// Sidebar
+	// Sidebar widgets
 	VBox_sidebar.set_name("sidebar");
-	VBox_sidebar.add_css_class("bar");
+	//VBox_sidebar.add_css_class("bar");
 	VBox_sidebar.append(Button_select_file);
+	Button_select_file.set_margin_top(20);
 	Button_select_file.set_child(*Gtk::make_managed<Gtk::Label>("Select file", Gtk::Align::CENTER));
 	Button_select_file.add_css_class("button-layout");
 	VBox_sidebar.append(Button_set_xmin);
@@ -87,6 +99,7 @@ Window::Window() :
   	);
 	m_refCssProvider->load_from_path("custom_gtkmm.css");
 	// end load extra CSS file
+
 
 
 }
