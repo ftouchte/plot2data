@@ -176,7 +176,7 @@ void Window::on_parsing_error(const Glib::RefPtr<const Gtk::CssSection>& section
 int main (int argc, char * argv[]) {
 	printf("Start plot2data...\n");
 
-	auto app = Gtk::Application::create("org.gtkmm.example");
+	auto app = Gtk::Application::create("org.gtkmm.example.plot2data");
 
 	return app->make_window_and_run<Window>(argc, argv);
 }
