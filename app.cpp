@@ -14,6 +14,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
+#include <ctime>
+#include <iomanip>
 
 /** Constructor */
 Window::Window() :
@@ -24,10 +26,16 @@ Window::Window() :
 	VBox_footer(Gtk::Orientation::VERTICAL,10),
 	VBox_sidebar(Gtk::Orientation::VERTICAL,0),
 	VBox_tools(Gtk::Orientation::VERTICAL,10),
-	VBox_settings(Gtk::Orientation::VERTICAL,10),
+	VBox_settings(Gtk::Orientation::VERTICAL,5),
 	HPaned(Gtk::Orientation::HORIZONTAL),
 	VPaned_sidebar(Gtk::Orientation::VERTICAL),
-	VPaned(Gtk::Orientation::VERTICAL)
+	VPaned(Gtk::Orientation::VERTICAL),
+	HBox_xmin(Gtk::Orientation::HORIZONTAL,50),
+	HBox_xmax(Gtk::Orientation::HORIZONTAL,50),
+	HBox_ymin(Gtk::Orientation::HORIZONTAL,50),
+	HBox_ymax(Gtk::Orientation::HORIZONTAL,50),
+	HBox_X(Gtk::Orientation::HORIZONTAL,50),
+	HBox_Y(Gtk::Orientation::HORIZONTAL,50)
 	//Separator_sidebar(Gtk::Orientation::HORIZONTAL)
 {
 	set_title("plot2data");
@@ -60,7 +68,7 @@ Window::Window() :
 	Frame_settings.set_name("frame-settings");
 	Frame_settings.set_child(VBox_settings);
 	HPaned.set_end_child(VPaned);
-	VPaned.set_position(800);
+	VPaned.set_position(700);
 	VPaned.set_start_child(Frame_area);
 	Frame_area.set_label("Drawing Area");
 	Frame_area.set_label_align(Gtk::Align::START);
@@ -69,6 +77,12 @@ Window::Window() :
 	DrawingArea_plot.set_expand();
 	// Create a new object: Terminal or Log that inherits from ScrolledWindow
 	VPaned.set_end_child(Frame_terminal);
+    Frame_terminal.set_child(ScrolledWindow_terminal);
+    ScrolledWindow_terminal.set_child(TextView_terminal);
+    TextBuffer_terminal = Gtk::TextBuffer::create();
+    TextView_terminal.set_buffer(TextBuffer_terminal);
+	ScrolledWindow_terminal.set_child(TextView_terminal);
+	TextView_terminal.set_name("text-terminal");
 	Frame_terminal.set_label("Terminal");
 	Frame_terminal.set_label_align(Gtk::Align::START);
 	Frame_terminal.set_name("frame-terminal");
@@ -108,19 +122,75 @@ Window::Window() :
 	VBox_tools.append(Button_measure_distance);
 	Button_measure_distance.set_child(*Gtk::make_managed<Gtk::Label>("Measure a distance", Gtk::Align::CENTER));
 	Button_measure_distance.add_css_class("button-layout");
-	
+
+    // Button signals
+    Button_select_file.signal_clicked().connect( sigc::mem_fun(*this, &Window::on_button_select_file_clicked));
+    Button_set_xmin.signal_clicked().connect( sigc::mem_fun(*this, &Window::on_button_set_xmin_clicked));
+    Button_set_xmax.signal_clicked().connect( sigc::mem_fun(*this, &Window::on_button_set_xmax_clicked));
+    Button_set_ymin.signal_clicked().connect( sigc::mem_fun(*this, &Window::on_button_set_ymin_clicked));
+    Button_set_ymax.signal_clicked().connect( sigc::mem_fun(*this, &Window::on_button_set_ymax_clicked));
+    Button_get_single_coord.signal_clicked().connect( sigc::mem_fun(*this, &Window::on_button_get_single_coord_clicked));
+    Button_start_recording.signal_clicked().connect( sigc::mem_fun(*this, &Window::on_button_start_recording_clicked));
+    Button_end_recording.signal_clicked().connect( sigc::mem_fun(*this, &Window::on_button_end_recording_clicked));
+    Button_save_data_as.signal_clicked().connect( sigc::mem_fun(*this, &Window::on_button_save_data_as_clicked));
+    Button_measure_distance.signal_clicked().connect( sigc::mem_fun(*this, &Window::on_button_measure_distance_clicked));
 	// Sidebar/Settings
 	VBox_settings.set_name("sidebar-settings");
 	VBox_settings.set_expand();
-	VBox_settings.append(Label_settings);
-	//Label_settings.set_wrap();
-	//Label_settings.set_justify(Gtk::Justification::FILL);
-	Label_settings.set_text("xmin : \n"
-				"xmax : \n"
-				"ymin : \n"
-				"ymax : \n"
-				" X   : \n"
-				" Y   : ");	
+        // xmin
+	VBox_settings.append(HBox_xmin);
+    HBox_xmin.append(Label_xmin);
+    Label_xmin.set_text("  xmin");
+    Label_xmin.add_css_class("label-current-settings");
+    HBox_xmin.append(Frame_xmin);
+    Frame_xmin.set_child(Value_xmin);
+    Value_xmin.set_text("nan");
+    Frame_xmin.add_css_class("current-settings");
+        // xmax
+	VBox_settings.append(HBox_xmax);
+    HBox_xmax.append(Label_xmax);
+    Label_xmax.set_text("  xmax");
+    Label_xmax.add_css_class("label-current-settings");
+    HBox_xmax.append(Frame_xmax);
+    Frame_xmax.set_child(Value_xmax);
+    Value_xmax.set_text("nan");
+    Frame_xmax.add_css_class("current-settings");
+        // ymin
+	VBox_settings.append(HBox_ymin);
+    HBox_ymin.append(Label_ymin);
+    Label_ymin.set_text("  ymin");
+    Label_ymin.add_css_class("label-current-settings");
+    HBox_ymin.append(Frame_ymin);
+    Frame_ymin.set_child(Value_ymin);
+    Value_ymin.set_text("nan");
+    Frame_ymin.add_css_class("current-settings");
+        // ymax
+	VBox_settings.append(HBox_ymax);
+    HBox_ymax.append(Label_ymax);
+    Label_ymax.set_text("  ymax");
+    Label_ymax.add_css_class("label-current-settings");
+    HBox_ymax.append(Frame_ymax);
+    Frame_ymax.set_child(Value_ymax);
+    Value_ymax.set_text("nan");
+    Frame_ymax.add_css_class("current-settings");
+        // X
+	VBox_settings.append(HBox_X);
+    HBox_X.append(Label_X);
+    Label_X.set_text("current X ");
+    Label_X.add_css_class("label-current-settings");
+    HBox_X.append(Frame_X);
+    Frame_X.set_child(Value_X);
+    Value_X.set_text("nan");
+    Frame_X.add_css_class("current-settings");
+        // Y
+	VBox_settings.append(HBox_Y);
+    HBox_Y.append(Label_Y);
+    Label_Y.set_text("current Y ");
+    Label_Y.add_css_class("label-current-settings");
+    HBox_Y.append(Frame_Y);
+    Frame_Y.set_child(Value_Y);
+    Value_Y.set_text("nan");
+    Frame_Y.add_css_class("current-settings");
 
 	// etc...
 	//VBox_tools.append(Separator_sidebar);
@@ -181,5 +251,60 @@ int main (int argc, char * argv[]) {
 	return app->make_window_and_run<Window>(argc, argv);
 }
 
+void Window::on_button_select_file_clicked(){
+    log_event("Select file...");
+}
+void Window::on_button_set_xmin_clicked(){
+    log_event("Set xmin...");
+    log_event(std::string("  xmin : ") + std::to_string(xmin));
+    Value_xmin.set_text(std::to_string(xmin));
+}
+void Window::on_button_set_xmax_clicked(){
+    log_event("Set xmax...");
+    log_event(std::string("  xmax : ") + std::to_string(xmax));
+    Value_xmax.set_text(std::to_string(xmax));
+}
+void Window::on_button_set_ymin_clicked(){
+    log_event("Set ymin...");
+    log_event(std::string("  ymin : ") + std::to_string(ymin));
+    Value_ymin.set_text(std::to_string(ymin));
+}
+void Window::on_button_set_ymax_clicked(){
+    log_event("Set ymax...");
+    log_event(std::string("  ymax : ") + std::to_string(ymax));
+    Value_ymax.set_text(std::to_string(ymax));
+}
+void Window::on_button_get_single_coord_clicked(){
+    log_event("Get coord...");
+    log_event(std::string("  X : ") + std::to_string(X) + std::string(";  Y : ") + std::to_string(Y));
+}
+void Window::on_button_start_recording_clicked(){
+    log_event("Start recording...");
+}
+void Window::on_button_end_recording_clicked(){
+    log_event("End recording...");
+}
+void Window::on_button_save_data_as_clicked(){
+    log_event("Save data as...");
+}
+void Window::on_button_measure_distance_clicked(){
+    log_event("Measure distance...");
+}
 
+void Window::update_terminal() {
+    TextBuffer_terminal->set_text(String_terminal.c_str());
+}
 
+std::string Window::time_t2string(std::time_t t, std::string format) {
+	std::tm tm = *std::localtime(&t);
+	std::ostringstream oss;
+	oss << std::put_time(&tm, format.c_str());
+	return oss.str();
+}
+
+void Window::log_event(std::string event_description) {
+    std::time_t now = std::time(nullptr);
+    String_terminal += time_t2string(now, "[%H:%M:%S]  ");
+    String_terminal += event_description + "\n";
+    update_terminal();
+}

@@ -28,6 +28,13 @@
 	border-width: 10px;
 }
 
+#text-terminal {
+	background: rgb(147, 250, 184);
+	/*color: white;*/
+	font-weight: normal;
+	font-family: "Lucida Console", "Courier New", monospace;
+}
+
 #frame-tools {
 	background: rgb(88, 165, 214);
 	color: rgb(0, 0, 0);
@@ -38,12 +45,30 @@
 }
 
 #frame-settings {
-	background: rgb(252, 251, 175);
+	background: rgb(213, 217, 217);
 	color: rgb(0, 0, 0);
 	font-weight: bold;
 	border-radius: 0px;
 	border-style: groove;
 	border-width: 10px;
+}
+
+
+.current-settings {
+	/*background: rgb(108, 5, 71);*/
+	color: rgb(0, 0, 0);
+	font-weight: normal;
+	border-color: rgb(255, 255, 255);
+	border-radius: 0px;
+	border-style: solid;
+	border-width: 2px;
+	padding: 10px;
+	font-family: "Lucida Console", "Courier New", monospace;
+}
+
+
+.label-current-settings {
+	font-family: "Lucida Console", "Courier New", monospace;
 }
 
 #frame-area {
