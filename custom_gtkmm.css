@@ -1,6 +1,6 @@
 .button-layout {
-	/*background: rgb(108, 5, 71);*/
-	background: rgb(88, 165, 214);
+	/*background: rgb(88, 165, 214);*/
+	background: rgb(213, 217, 217);
 	color: rgb(0, 0, 0);
 	font-weight: normal;
 	border-color: rgb(108, 5, 71);
@@ -36,7 +36,7 @@
 }
 
 #frame-tools {
-	background: rgb(88, 165, 214);
+	background: rgb(213, 217, 217);
 	color: rgb(0, 0, 0);
 	font-weight: bold;
 	border-radius: 0px;

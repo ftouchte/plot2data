@@ -30,12 +30,12 @@ Window::Window() :
 	HPaned(Gtk::Orientation::HORIZONTAL),
 	VPaned_sidebar(Gtk::Orientation::VERTICAL),
 	VPaned(Gtk::Orientation::VERTICAL),
-	HBox_xmin(Gtk::Orientation::HORIZONTAL,50),
-	HBox_xmax(Gtk::Orientation::HORIZONTAL,50),
-	HBox_ymin(Gtk::Orientation::HORIZONTAL,50),
-	HBox_ymax(Gtk::Orientation::HORIZONTAL,50),
-	HBox_X(Gtk::Orientation::HORIZONTAL,50),
-	HBox_Y(Gtk::Orientation::HORIZONTAL,50)
+	HBox_xmin(Gtk::Orientation::HORIZONTAL,20),
+	HBox_xmax(Gtk::Orientation::HORIZONTAL,20),
+	HBox_ymin(Gtk::Orientation::HORIZONTAL,20),
+	HBox_ymax(Gtk::Orientation::HORIZONTAL,20),
+	HBox_X(Gtk::Orientation::HORIZONTAL,20),
+	HBox_Y(Gtk::Orientation::HORIZONTAL,20)
 	//Separator_sidebar(Gtk::Orientation::HORIZONTAL)
 {
 	set_title("plot2data");
@@ -57,7 +57,7 @@ Window::Window() :
 	HPaned.set_position(400); // requested size for the first child
 	VBox_sidebar.append(VPaned_sidebar);
 	VPaned_sidebar.set_start_child(ScrolledWindow_tools);
-	VPaned_sidebar.set_position(600); 
+	VPaned_sidebar.set_position(550); 
 	ScrolledWindow_tools.set_child(Frame_tools);
 	//VBox_sidebar.append(Frame_tools);
 	Frame_tools.set_label("Tools");
@@ -75,6 +75,7 @@ Window::Window() :
 	Frame_area.set_name("frame-area");
 	Frame_area.set_child(DrawingArea_plot);
 	DrawingArea_plot.set_expand();
+    DrawingArea_plot.set_draw_func(sigc::mem_fun(*this, &Window::on_draw_plot) );
 	// Create a new object: Terminal or Log that inherits from ScrolledWindow
 	VPaned.set_end_child(Frame_terminal);
     Frame_terminal.set_child(ScrolledWindow_terminal);
@@ -95,18 +96,18 @@ Window::Window() :
 	Button_select_file.set_margin_top(20);
 	Button_select_file.set_child(*Gtk::make_managed<Gtk::Label>("Select file", Gtk::Align::CENTER));
 	Button_select_file.add_css_class("button-layout");
-	VBox_tools.append(Button_set_xmin);
-	Button_set_xmin.set_child(*Gtk::make_managed<Gtk::Label>("Set xmin", Gtk::Align::CENTER));
-	Button_set_xmin.add_css_class("button-layout");
-	VBox_tools.append(Button_set_xmax);
-	Button_set_xmax.set_child(*Gtk::make_managed<Gtk::Label>("Set xmax", Gtk::Align::CENTER));
-	Button_set_xmax.add_css_class("button-layout");
-	VBox_tools.append(Button_set_ymin);
-	Button_set_ymin.set_child(*Gtk::make_managed<Gtk::Label>("Set ymin", Gtk::Align::CENTER));
-	Button_set_ymin.add_css_class("button-layout");
-	VBox_tools.append(Button_set_ymax);
-	Button_set_ymax.set_child(*Gtk::make_managed<Gtk::Label>("Set ymax", Gtk::Align::CENTER));
-	Button_set_ymax.add_css_class("button-layout");
+	VBox_tools.append(Button_set_wmin);
+	Button_set_wmin.set_child(*Gtk::make_managed<Gtk::Label>("Set wmin", Gtk::Align::CENTER));
+	Button_set_wmin.add_css_class("button-layout");
+	VBox_tools.append(Button_set_wmax);
+	Button_set_wmax.set_child(*Gtk::make_managed<Gtk::Label>("Set wmax", Gtk::Align::CENTER));
+	Button_set_wmax.add_css_class("button-layout");
+	VBox_tools.append(Button_set_hmin);
+	Button_set_hmin.set_child(*Gtk::make_managed<Gtk::Label>("Set hmin", Gtk::Align::CENTER));
+	Button_set_hmin.add_css_class("button-layout");
+	VBox_tools.append(Button_set_hmax);
+	Button_set_hmax.set_child(*Gtk::make_managed<Gtk::Label>("Set hmax", Gtk::Align::CENTER));
+	Button_set_hmax.add_css_class("button-layout");
 	VBox_tools.append(Button_get_single_coord);
 	Button_get_single_coord.set_child(*Gtk::make_managed<Gtk::Label>("Select a point", Gtk::Align::CENTER));
 	Button_get_single_coord.add_css_class("button-layout");
@@ -125,10 +126,10 @@ Window::Window() :
 
     // Button signals
     Button_select_file.signal_clicked().connect( sigc::mem_fun(*this, &Window::on_button_select_file_clicked));
-    Button_set_xmin.signal_clicked().connect( sigc::mem_fun(*this, &Window::on_button_set_xmin_clicked));
-    Button_set_xmax.signal_clicked().connect( sigc::mem_fun(*this, &Window::on_button_set_xmax_clicked));
-    Button_set_ymin.signal_clicked().connect( sigc::mem_fun(*this, &Window::on_button_set_ymin_clicked));
-    Button_set_ymax.signal_clicked().connect( sigc::mem_fun(*this, &Window::on_button_set_ymax_clicked));
+    Button_set_wmin.signal_clicked().connect( sigc::mem_fun(*this, &Window::on_button_set_wmin_clicked));
+    Button_set_wmax.signal_clicked().connect( sigc::mem_fun(*this, &Window::on_button_set_wmax_clicked));
+    Button_set_hmin.signal_clicked().connect( sigc::mem_fun(*this, &Window::on_button_set_hmin_clicked));
+    Button_set_hmax.signal_clicked().connect( sigc::mem_fun(*this, &Window::on_button_set_hmax_clicked));
     Button_get_single_coord.signal_clicked().connect( sigc::mem_fun(*this, &Window::on_button_get_single_coord_clicked));
     Button_start_recording.signal_clicked().connect( sigc::mem_fun(*this, &Window::on_button_start_recording_clicked));
     Button_end_recording.signal_clicked().connect( sigc::mem_fun(*this, &Window::on_button_end_recording_clicked));
@@ -143,36 +144,68 @@ Window::Window() :
     Label_xmin.set_text("  xmin");
     Label_xmin.add_css_class("label-current-settings");
     HBox_xmin.append(Frame_xmin);
-    Frame_xmin.set_child(Value_xmin);
-    Value_xmin.set_text("nan");
+    Frame_xmin.set_child(Entry_xmin);
+    Entry_xmin.set_text("nan");
     Frame_xmin.add_css_class("current-settings");
+            // wmin
+    HBox_xmin.append(Label_wmin);
+    Label_wmin.set_text("  wmin");
+    Label_wmin.add_css_class("label-current-settings");
+    HBox_xmin.append(Frame_wmin);
+    Frame_wmin.set_child(Value_wmin);
+    Value_wmin.set_text("nan");
+    Frame_wmin.add_css_class("current-settings");
         // xmax
 	VBox_settings.append(HBox_xmax);
     HBox_xmax.append(Label_xmax);
     Label_xmax.set_text("  xmax");
     Label_xmax.add_css_class("label-current-settings");
     HBox_xmax.append(Frame_xmax);
-    Frame_xmax.set_child(Value_xmax);
-    Value_xmax.set_text("nan");
+    Frame_xmax.set_child(Entry_xmax);
+    Entry_xmax.set_text("nan");
     Frame_xmax.add_css_class("current-settings");
+            // wmax
+    HBox_xmax.append(Label_wmax);
+    Label_wmax.set_text("  wmax");
+    Label_wmax.add_css_class("label-current-settings");
+    HBox_xmax.append(Frame_wmax);
+    Frame_wmax.set_child(Value_wmax);
+    Value_wmax.set_text("nan");
+    Frame_wmax.add_css_class("current-settings");
         // ymin
 	VBox_settings.append(HBox_ymin);
     HBox_ymin.append(Label_ymin);
     Label_ymin.set_text("  ymin");
     Label_ymin.add_css_class("label-current-settings");
     HBox_ymin.append(Frame_ymin);
-    Frame_ymin.set_child(Value_ymin);
-    Value_ymin.set_text("nan");
+    Frame_ymin.set_child(Entry_ymin);
+    Entry_ymin.set_text("nan");
     Frame_ymin.add_css_class("current-settings");
+            // hmin
+    HBox_ymin.append(Label_hmin);
+    Label_hmin.set_text("  hmin");
+    Label_hmin.add_css_class("label-current-settings");
+    HBox_ymin.append(Frame_hmin);
+    Frame_hmin.set_child(Value_hmin);
+    Value_hmin.set_text("nan");
+    Frame_hmin.add_css_class("current-settings");
         // ymax
 	VBox_settings.append(HBox_ymax);
     HBox_ymax.append(Label_ymax);
     Label_ymax.set_text("  ymax");
     Label_ymax.add_css_class("label-current-settings");
     HBox_ymax.append(Frame_ymax);
-    Frame_ymax.set_child(Value_ymax);
-    Value_ymax.set_text("nan");
+    Frame_ymax.set_child(Entry_ymax);
+    Entry_ymax.set_text("nan");
     Frame_ymax.add_css_class("current-settings");
+            // hmax
+    HBox_ymax.append(Label_hmax);
+    Label_hmax.set_text("  hmax");
+    Label_hmax.add_css_class("label-current-settings");
+    HBox_ymax.append(Frame_hmax);
+    Frame_hmax.set_child(Value_hmax);
+    Value_hmax.set_text("nan");
+    Frame_hmax.add_css_class("current-settings");
         // X
 	VBox_settings.append(HBox_X);
     HBox_X.append(Label_X);
@@ -182,6 +215,14 @@ Window::Window() :
     Frame_X.set_child(Value_X);
     Value_X.set_text("nan");
     Frame_X.add_css_class("current-settings");
+            // W
+    HBox_X.append(Label_W);
+    Label_W.set_text("  W");
+    Label_W.add_css_class("label-current-settings");
+    HBox_X.append(Frame_W);
+    Frame_W.set_child(Value_W);
+    Value_W.set_text("nan");
+    Frame_W.add_css_class("current-settings");
         // Y
 	VBox_settings.append(HBox_Y);
     HBox_Y.append(Label_Y);
@@ -191,6 +232,26 @@ Window::Window() :
     Frame_Y.set_child(Value_Y);
     Value_Y.set_text("nan");
     Frame_Y.add_css_class("current-settings");
+            // H
+    HBox_Y.append(Label_H);
+    Label_H.set_text("  H");
+    Label_H.add_css_class("label-current-settings");
+    HBox_Y.append(Frame_H);
+    Frame_H.set_child(Value_H);
+    Value_H.set_text("nan");
+    Frame_H.add_css_class("current-settings");
+
+    //////////////////////////////////
+    /// Event controller
+    //////////////////////////////////
+    auto gesture_track = Gtk::EventControllerMotion::create();
+    auto gesture_click = Gtk::GestureClick::create();
+    DrawingArea_plot.add_controller(gesture_track);
+    DrawingArea_plot.add_controller(gesture_click);
+    gesture_track->signal_enter().connect(sigc::mem_fun(*this, &Window::on_mouse_tracked_enter));
+    gesture_track->signal_leave().connect(sigc::mem_fun(*this, &Window::on_mouse_tracked_leave));
+    gesture_track->signal_motion().connect(sigc::mem_fun(*this, &Window::on_mouse_tracked_move));
+    gesture_click->signal_pressed().connect(sigc::mem_fun(*this, &Window::on_mouse_clicked));
 
 	// etc...
 	//VBox_tools.append(Separator_sidebar);
@@ -253,46 +314,61 @@ int main (int argc, char * argv[]) {
 
 void Window::on_button_select_file_clicked(){
     log_event("Select file...");
+    log_event(std::string("  filename : ") + filename);
+    ///////////////
+    int width = DrawingArea_plot.get_width();
+	int height = DrawingArea_plot.get_height();
+    pixels =  Gdk::Pixbuf::create_from_file(filename.c_str(), width, height, true);
+    DrawingArea_plot.queue_draw();
 }
-void Window::on_button_set_xmin_clicked(){
-    log_event("Set xmin...");
-    log_event(std::string("  xmin : ") + std::to_string(xmin));
-    Value_xmin.set_text(std::to_string(xmin));
+
+void Window::on_button_set_wmin_clicked(){
+    wmin = wrec;
+    Value_wmin.set_text(std::to_string(wmin));
+    log_event("Set wmin...");
+    log_event(std::string("  wmin : ") + std::to_string(wmin));
 }
-void Window::on_button_set_xmax_clicked(){
-    log_event("Set xmax...");
-    log_event(std::string("  xmax : ") + std::to_string(xmax));
-    Value_xmax.set_text(std::to_string(xmax));
+
+void Window::on_button_set_wmax_clicked(){
+    wmax = wrec;
+    Value_wmax.set_text(std::to_string(wmax));
+    log_event("Set wmax...");
+    log_event(std::string("  wmax : ") + std::to_string(wmax));
 }
-void Window::on_button_set_ymin_clicked(){
-    log_event("Set ymin...");
-    log_event(std::string("  ymin : ") + std::to_string(ymin));
-    Value_ymin.set_text(std::to_string(ymin));
+
+void Window::on_button_set_hmin_clicked(){
+    hmin = hrec;
+    Value_hmin.set_text(std::to_string(hmin));
+    log_event("Set hmin...");
+    log_event(std::string("  hmin : ") + std::to_string(hmin));
 }
-void Window::on_button_set_ymax_clicked(){
-    log_event("Set ymax...");
-    log_event(std::string("  ymax : ") + std::to_string(ymax));
-    Value_ymax.set_text(std::to_string(ymax));
+
+void Window::on_button_set_hmax_clicked(){
+    hmax = hrec;
+    Value_hmax.set_text(std::to_string(hmax));
+    log_event("Set hmax...");
+    log_event(std::string("  hmax : ") + std::to_string(hmax));
 }
+
 void Window::on_button_get_single_coord_clicked(){
     log_event("Get coord...");
     log_event(std::string("  X : ") + std::to_string(X) + std::string(";  Y : ") + std::to_string(Y));
 }
+
 void Window::on_button_start_recording_clicked(){
     log_event("Start recording...");
 }
+
 void Window::on_button_end_recording_clicked(){
     log_event("End recording...");
 }
+
 void Window::on_button_save_data_as_clicked(){
     log_event("Save data as...");
 }
+
 void Window::on_button_measure_distance_clicked(){
     log_event("Measure distance...");
-}
-
-void Window::update_terminal() {
-    TextBuffer_terminal->set_text(String_terminal.c_str());
 }
 
 std::string Window::time_t2string(std::time_t t, std::string format) {
@@ -304,7 +380,47 @@ std::string Window::time_t2string(std::time_t t, std::string format) {
 
 void Window::log_event(std::string event_description) {
     std::time_t now = std::time(nullptr);
-    String_terminal += time_t2string(now, "[%H:%M:%S]  ");
-    String_terminal += event_description + "\n";
-    update_terminal();
+    Gtk::TextBuffer::iterator iter = TextBuffer_terminal->end();
+    iter = TextBuffer_terminal->insert_markup(iter, (std::string("<span foreground='red'>") + time_t2string(now, "[%H:%M:%S]  ") + std::string("</span>")).c_str());
+    iter = TextBuffer_terminal->insert(iter, event_description);
+    iter = TextBuffer_terminal->insert(iter, "\n");
+    String_terminal = TextBuffer_terminal->get_text();
+    TextView_terminal.scroll_to(iter);
+}
+
+void Window::on_mouse_tracked_enter(double x, double y){
+    //log_event("Enter plot area...");
+    flagInPlotArea = true;
+    //int width = DrawingArea_plot.get_width();
+	//int height = DrawingArea_plot.get_height();
+    //log_event(std::string("  width : ") + std::to_string(width) + "  ; height : " + std::to_string(height));
+}
+
+void Window::on_mouse_tracked_move(double x, double y){
+    W = x;
+    H = y;
+    Value_W.set_text(std::to_string(H));
+    Value_H.set_text(std::to_string(W));
+    Value_X.set_text("???");
+    Value_Y.set_text("???");
+    //log_event(std::string("  x : ") + std::to_string(x) + std::string(";  y : ") + std::to_string(y));
+}
+
+void Window::on_mouse_tracked_leave(){
+    //log_event("Leave plot area...");
+    flagInPlotArea = false;
+}
+
+void Window::on_mouse_clicked(int n_press, double x, double y){
+    //log_event("Point selected...");
+    wrec = x;
+    hrec = y;
+    log_event(std::string("Point selected... (nb. press = ") + std::to_string(n_press) + std::string(")"));
+    log_event(std::string("  x : ") + std::to_string(x) + std::string(";  y : ") + std::to_string(y));
+}
+
+void Window::on_draw_plot(const Cairo::RefPtr<Cairo::Context>& cr, int width, int height) {
+    if (!pixels) return;
+    Gdk::Cairo::set_source_pixbuf(cr, pixels, (width - pixels->get_width())/2, (height - pixels->get_height())/2);
+    cr->paint();
 }
