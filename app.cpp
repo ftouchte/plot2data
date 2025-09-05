@@ -16,6 +16,8 @@
 #include <iostream>
 #include <ctime>
 #include <iomanip>
+#include <functional>
+#include <regex>
 
 /** Constructor */
 Window::Window() :
@@ -35,7 +37,9 @@ Window::Window() :
 	HBox_ymin(Gtk::Orientation::HORIZONTAL,20),
 	HBox_ymax(Gtk::Orientation::HORIZONTAL,20),
 	HBox_X(Gtk::Orientation::HORIZONTAL,20),
-	HBox_Y(Gtk::Orientation::HORIZONTAL,20)
+	HBox_Y(Gtk::Orientation::HORIZONTAL,20),
+	HBox_rec_WH(Gtk::Orientation::HORIZONTAL,20),
+	HBox_rec_XY(Gtk::Orientation::HORIZONTAL,20)
 	//Separator_sidebar(Gtk::Orientation::HORIZONTAL)
 {
 	set_title("plot2data");
@@ -57,7 +61,7 @@ Window::Window() :
 	HPaned.set_position(400); // requested size for the first child
 	VBox_sidebar.append(VPaned_sidebar);
 	VPaned_sidebar.set_start_child(ScrolledWindow_tools);
-	VPaned_sidebar.set_position(550); 
+	VPaned_sidebar.set_position(300); 
 	ScrolledWindow_tools.set_child(Frame_tools);
 	//VBox_sidebar.append(Frame_tools);
 	Frame_tools.set_label("Tools");
@@ -136,80 +140,19 @@ Window::Window() :
     Button_save_data_as.signal_clicked().connect( sigc::mem_fun(*this, &Window::on_button_save_data_as_clicked));
     Button_measure_distance.signal_clicked().connect( sigc::mem_fun(*this, &Window::on_button_measure_distance_clicked));
 	// Sidebar/Settings
-	VBox_settings.set_name("sidebar-settings");
+	VBox_settings.set_name("sidebar-setting");
 	VBox_settings.set_expand();
-        // xmin
-	VBox_settings.append(HBox_xmin);
-    HBox_xmin.append(Label_xmin);
-    Label_xmin.set_text("  xmin");
-    Label_xmin.add_css_class("label-current-settings");
-    HBox_xmin.append(Frame_xmin);
-    Frame_xmin.set_child(Entry_xmin);
-    Entry_xmin.set_text("nan");
-    Frame_xmin.add_css_class("current-settings");
-            // wmin
-    HBox_xmin.append(Label_wmin);
-    Label_wmin.set_text("  wmin");
-    Label_wmin.add_css_class("label-current-settings");
-    HBox_xmin.append(Frame_wmin);
-    Frame_wmin.set_child(Value_wmin);
-    Value_wmin.set_text("nan");
-    Frame_wmin.add_css_class("current-settings");
-        // xmax
-	VBox_settings.append(HBox_xmax);
-    HBox_xmax.append(Label_xmax);
-    Label_xmax.set_text("  xmax");
-    Label_xmax.add_css_class("label-current-settings");
-    HBox_xmax.append(Frame_xmax);
-    Frame_xmax.set_child(Entry_xmax);
-    Entry_xmax.set_text("nan");
-    Frame_xmax.add_css_class("current-settings");
-            // wmax
-    HBox_xmax.append(Label_wmax);
-    Label_wmax.set_text("  wmax");
-    Label_wmax.add_css_class("label-current-settings");
-    HBox_xmax.append(Frame_wmax);
-    Frame_wmax.set_child(Value_wmax);
-    Value_wmax.set_text("nan");
-    Frame_wmax.add_css_class("current-settings");
-        // ymin
-	VBox_settings.append(HBox_ymin);
-    HBox_ymin.append(Label_ymin);
-    Label_ymin.set_text("  ymin");
-    Label_ymin.add_css_class("label-current-settings");
-    HBox_ymin.append(Frame_ymin);
-    Frame_ymin.set_child(Entry_ymin);
-    Entry_ymin.set_text("nan");
-    Frame_ymin.add_css_class("current-settings");
-            // hmin
-    HBox_ymin.append(Label_hmin);
-    Label_hmin.set_text("  hmin");
-    Label_hmin.add_css_class("label-current-settings");
-    HBox_ymin.append(Frame_hmin);
-    Frame_hmin.set_child(Value_hmin);
-    Value_hmin.set_text("nan");
-    Frame_hmin.add_css_class("current-settings");
-        // ymax
-	VBox_settings.append(HBox_ymax);
-    HBox_ymax.append(Label_ymax);
-    Label_ymax.set_text("  ymax");
-    Label_ymax.add_css_class("label-current-settings");
-    HBox_ymax.append(Frame_ymax);
-    Frame_ymax.set_child(Entry_ymax);
-    Entry_ymax.set_text("nan");
-    Frame_ymax.add_css_class("current-settings");
-            // hmax
-    HBox_ymax.append(Label_hmax);
-    Label_hmax.set_text("  hmax");
-    Label_hmax.add_css_class("label-current-settings");
-    HBox_ymax.append(Frame_hmax);
-    Frame_hmax.set_child(Value_hmax);
-    Value_hmax.set_text("nan");
-    Frame_hmax.add_css_class("current-settings");
+    // Current position
+    auto ptr_Label_pos = Gtk::make_managed<Gtk::Label>();
+    ptr_Label_pos->set_margin_top(10);
+    ptr_Label_pos->set_margin_bottom(10);
+    ptr_Label_pos->set_markup("<span foreground='red'> Position </span>");
+    ptr_Label_pos->add_css_class("label-current-settings");
+	VBox_settings.append(*ptr_Label_pos);
         // X
 	VBox_settings.append(HBox_X);
     HBox_X.append(Label_X);
-    Label_X.set_text("current X ");
+    Label_X.set_text("  X ");
     Label_X.add_css_class("label-current-settings");
     HBox_X.append(Frame_X);
     Frame_X.set_child(Value_X);
@@ -226,7 +169,7 @@ Window::Window() :
         // Y
 	VBox_settings.append(HBox_Y);
     HBox_Y.append(Label_Y);
-    Label_Y.set_text("current Y ");
+    Label_Y.set_text("  Y ");
     Label_Y.add_css_class("label-current-settings");
     HBox_Y.append(Frame_Y);
     Frame_Y.set_child(Value_Y);
@@ -240,6 +183,137 @@ Window::Window() :
     Frame_H.set_child(Value_H);
     Value_H.set_text("nan");
     Frame_H.add_css_class("current-settings");
+    // User defined
+    auto ptr_Label_user = Gtk::make_managed<Gtk::Label>();
+    ptr_Label_user->set_margin_top(10);
+    ptr_Label_user->set_margin_bottom(10);
+    ptr_Label_user->set_markup("<span foreground='red'> User defined </span>");
+    ptr_Label_user->add_css_class("label-current-settings");
+	VBox_settings.append(*ptr_Label_user);
+        // xmin
+    xmin = std::nan("");
+	VBox_settings.append(HBox_xmin);
+    HBox_xmin.append(Label_xmin);
+    Label_xmin.set_text("  xmin");
+    Label_xmin.add_css_class("label-current-settings");
+    HBox_xmin.append(Frame_xmin);
+    Frame_xmin.set_child(Entry_xmin);
+    Entry_xmin.set_text("nan");
+    Frame_xmin.add_css_class("current-settings");
+    Entry_xmin.signal_activate().connect([this] () -> void {
+                read_entry(&Label_xmin, &Entry_xmin, &xmin);
+            });
+            // wmin
+    HBox_xmin.append(Label_wmin);
+    Label_wmin.set_text("  wmin");
+    Label_wmin.add_css_class("label-current-settings");
+    HBox_xmin.append(Frame_wmin);
+    Frame_wmin.set_child(Value_wmin);
+    Value_wmin.set_text("nan");
+    Frame_wmin.add_css_class("current-settings");
+        // xmax
+    xmax = std::nan("");
+	VBox_settings.append(HBox_xmax);
+    HBox_xmax.append(Label_xmax);
+    Label_xmax.set_text("  xmax");
+    Label_xmax.add_css_class("label-current-settings");
+    HBox_xmax.append(Frame_xmax);
+    Frame_xmax.set_child(Entry_xmax);
+    Entry_xmax.set_text("nan");
+    Frame_xmax.add_css_class("current-settings");
+    Entry_xmax.signal_activate().connect([this] () -> void {
+                read_entry(&Label_xmax, &Entry_xmax, &xmax);
+            });
+            // wmax
+    HBox_xmax.append(Label_wmax);
+    Label_wmax.set_text("  wmax");
+    Label_wmax.add_css_class("label-current-settings");
+    HBox_xmax.append(Frame_wmax);
+    Frame_wmax.set_child(Value_wmax);
+    Value_wmax.set_text("nan");
+    Frame_wmax.add_css_class("current-settings");
+        // ymin
+    ymin = std::nan("");
+	VBox_settings.append(HBox_ymin);
+    HBox_ymin.append(Label_ymin);
+    Label_ymin.set_text("  ymin");
+    Label_ymin.add_css_class("label-current-settings");
+    HBox_ymin.append(Frame_ymin);
+    Frame_ymin.set_child(Entry_ymin);
+    Entry_ymin.set_text("nan");
+    Frame_ymin.add_css_class("current-settings");
+    Entry_ymin.signal_activate().connect([this] () -> void {
+                read_entry(&Label_ymin, &Entry_ymin, &ymin);
+            });
+            // hmin
+    HBox_ymin.append(Label_hmin);
+    Label_hmin.set_text("  hmin");
+    Label_hmin.add_css_class("label-current-settings");
+    HBox_ymin.append(Frame_hmin);
+    Frame_hmin.set_child(Value_hmin);
+    Value_hmin.set_text("nan");
+    Frame_hmin.add_css_class("current-settings");
+        // ymax
+    ymax = std::nan("");
+	VBox_settings.append(HBox_ymax);
+    HBox_ymax.append(Label_ymax);
+    Label_ymax.set_text("  ymax");
+    Label_ymax.add_css_class("label-current-settings");
+    HBox_ymax.append(Frame_ymax);
+    Frame_ymax.set_child(Entry_ymax);
+    Entry_ymax.set_text("nan");
+    Frame_ymax.add_css_class("current-settings");
+    Entry_ymax.signal_activate().connect([this] () -> void {
+                read_entry(&Label_ymax, &Entry_ymax, &ymax);
+            });
+            // hmax
+    HBox_ymax.append(Label_hmax);
+    Label_hmax.set_text("  hmax");
+    Label_hmax.add_css_class("label-current-settings");
+    HBox_ymax.append(Frame_hmax);
+    Frame_hmax.set_child(Value_hmax);
+    Value_hmax.set_text("nan");
+    Frame_hmax.add_css_class("current-settings");
+    // Last record
+    auto ptr_Label_records = Gtk::make_managed<Gtk::Label>("Last records");
+    ptr_Label_records->set_margin_top(20);
+    ptr_Label_records->set_markup("<span foreground='red'> Last records </span>");
+    ptr_Label_records->add_css_class("label-current-settings");
+	VBox_settings.append(*ptr_Label_records);
+        // wrec
+	VBox_settings.append(HBox_rec_WH);
+    HBox_rec_WH.append(Label_wrec);
+    Label_wrec.set_text("  wrec");
+    Label_wrec.add_css_class("label-current-settings");
+    HBox_rec_WH.append(Frame_wrec);
+    Frame_wrec.set_child(Value_wrec);
+    Value_wrec.set_text("nan");
+    Frame_wrec.add_css_class("current-settings");
+            // hrec
+    HBox_rec_WH.append(Label_hrec);
+    Label_hrec.set_text("  hrec");
+    Label_hrec.add_css_class("label-current-settings");
+    HBox_rec_WH.append(Frame_hrec);
+    Frame_hrec.set_child(Value_hrec);
+    Value_hrec.set_text("nan");
+    Frame_hrec.add_css_class("current-settings");
+        // xrec
+	VBox_settings.append(HBox_rec_XY);
+    HBox_rec_XY.append(Label_xrec);
+    Label_xrec.set_text("  xrec");
+    Label_xrec.add_css_class("label-current-settings");
+    HBox_rec_XY.append(Frame_xrec);
+    Frame_xrec.set_child(Value_xrec);
+    Value_xrec.set_text("nan");
+    Frame_xrec.add_css_class("current-settings");
+            // yrec
+    HBox_rec_XY.append(Label_yrec);
+    Label_yrec.set_text("  yrec");
+    Label_yrec.add_css_class("label-current-settings");
+    HBox_rec_XY.append(Frame_yrec);
+    Frame_yrec.set_child(Value_yrec);
+    Value_yrec.set_text("nan");
+    Frame_yrec.add_css_class("current-settings");
 
     //////////////////////////////////
     /// Event controller
@@ -399,10 +473,12 @@ void Window::on_mouse_tracked_enter(double x, double y){
 void Window::on_mouse_tracked_move(double x, double y){
     W = x;
     H = y;
-    Value_W.set_text(std::to_string(H));
-    Value_H.set_text(std::to_string(W));
-    Value_X.set_text("???");
-    Value_Y.set_text("???");
+    X = w2x(W);
+    Y = h2y(H);
+    Value_W.set_text(std::to_string(W));
+    Value_H.set_text(std::to_string(H));
+    Value_X.set_text(std::to_string(X));
+    Value_Y.set_text(std::to_string(Y));
     //log_event(std::string("  x : ") + std::to_string(x) + std::string(";  y : ") + std::to_string(y));
 }
 
@@ -415,12 +491,47 @@ void Window::on_mouse_clicked(int n_press, double x, double y){
     //log_event("Point selected...");
     wrec = x;
     hrec = y;
+    xrec = w2x(wrec);
+    yrec = h2y(hrec);
+    Value_wrec.set_text(std::to_string(wrec));
+    Value_hrec.set_text(std::to_string(hrec));
+    Value_xrec.set_text(std::to_string(xrec));
+    Value_yrec.set_text(std::to_string(yrec));
     log_event(std::string("Point selected... (nb. press = ") + std::to_string(n_press) + std::string(")"));
-    log_event(std::string("  x : ") + std::to_string(x) + std::string(";  y : ") + std::to_string(y));
+    log_event(std::string("  xrec : ") + std::to_string(xrec) + std::string(";  yrec : ") + std::to_string(yrec));
 }
 
 void Window::on_draw_plot(const Cairo::RefPtr<Cairo::Context>& cr, int width, int height) {
     if (!pixels) return;
     Gdk::Cairo::set_source_pixbuf(cr, pixels, (width - pixels->get_width())/2, (height - pixels->get_height())/2);
     cr->paint();
+}
+
+
+double Window::linear_transformation(double x1, double y1, double x2, double y2, double x) const {
+	if (x1 == x2) {return std::nan("");} // do nothing
+	double slope = (y2-y1)/(x2-x1);
+	double y=  slope*(x-x1) + y1;
+	return y;
+}
+
+
+double Window::w2x(double w) const {
+	return linear_transformation(wmin, xmin, wmax, xmax, w);
+}
+
+double Window::h2y(double h) const {
+	return linear_transformation(hmin, ymin, hmax, ymax, h);
+}
+
+void Window::read_entry(Gtk::Label *label, Gtk::Entry  *entry, double *value) {
+    std::string str = entry->get_text().c_str();
+    std::regex re(R"([0-9\.eE\-]+)");
+    if (std::regex_match(str, re)) {
+        double val = std::atof(str.c_str());
+        *value = val;
+    } else { 
+        *value = std::nan("");
+    }
+    log_event(std::string(label->get_text()) + std::string(" set to : ") + std::to_string(*value));
 }

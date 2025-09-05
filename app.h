@@ -44,15 +44,15 @@ protected :
 	Gtk::ScrolledWindow ScrolledWindow_tools, ScrolledWindow_terminal;
 	Gtk::DrawingArea DrawingArea_plot;
 	Gtk::Frame Frame_tools, Frame_settings, Frame_terminal, Frame_area;
-	Gtk::Box HBox_xmin, HBox_xmax, HBox_ymin, HBox_ymax, HBox_X, HBox_Y;
+	Gtk::Box HBox_xmin, HBox_xmax, HBox_ymin, HBox_ymax, HBox_X, HBox_Y, HBox_rec_WH, HBox_rec_XY;
 	// relative coordinates
     Gtk::Label Label_xmin, Label_xmax, Label_ymin, Label_ymax, Label_X, Label_Y;
 	Gtk::Entry Entry_xmin, Entry_xmax, Entry_ymin, Entry_ymax;
     Gtk::Frame Frame_xmin, Frame_xmax, Frame_ymin, Frame_ymax, Frame_X, Frame_Y;
     // absolute coordinates
-	Gtk::Label Label_wmin, Label_wmax, Label_hmin, Label_hmax, Label_W, Label_H;
-	Gtk::Label Value_wmin, Value_wmax, Value_hmin, Value_hmax, Value_W, Value_H, Value_X, Value_Y;
-	Gtk::Frame Frame_wmin, Frame_wmax, Frame_hmin, Frame_hmax, Frame_W, Frame_H;
+	Gtk::Label Label_wmin, Label_wmax, Label_hmin, Label_hmax, Label_W, Label_H, Label_wrec, Label_hrec, Label_xrec, Label_yrec;
+	Gtk::Label Value_wmin, Value_wmax, Value_hmin, Value_hmax, Value_W, Value_H, Value_wrec, Value_hrec, Value_xrec, Value_yrec, Value_X, Value_Y;
+	Gtk::Frame Frame_wmin, Frame_wmax, Frame_hmin, Frame_hmax, Frame_W, Frame_H, Frame_wrec, Frame_hrec, Frame_xrec, Frame_yrec;
 	//Gtk::Separator Separator_sidebar;
 
 	// Peut-être devrais-je customiser les bouttons
@@ -109,6 +109,10 @@ public :
     void on_mouse_tracked_leave();
     void on_mouse_clicked(int n_press, double x, double y);
     void on_draw_plot(const Cairo::RefPtr<Cairo::Context>& cr, int width, int height);
+    double w2x(double w) const;
+    double h2y(double h) const;
+    double linear_transformation(double x1, double y1, double x2, double y2, double x) const;
+    void read_entry(Gtk::Label *label, Gtk::Entry *entry, double *value);
 };
 
 #endif
